@@ -33,6 +33,7 @@ export default {
     startTimer() {
       this.timer = setInterval(() => {
         this.timeLeft = this.timeLeft - 1000;
+        this.$store.dispatch('updateState', { timer: this.timeLeft, lightstate: this.state });
       }, 1000);
     },
     startBlinking() {
@@ -48,16 +49,26 @@ export default {
     },
   },
   created() {
-    if (this.color == 'red')
-      this.state = 1;
-    else if (this.color == 'yellow')
-      this.state = 2;
-    else
-      this.state = 3;
-    if (this.$route.path != `/${this.colors[this.state].name}`) this.$router.push({ name: 'Home', params: { color: this.colors[this.state].name } });
+    if (this.$store.state.lightstate != -1 && this.$route.path == '/')
+      this.state = parseInt(this.$store.state.lightstate);
+    else {
+      if (this.color == 'red')
+        this.state = 1;
+      else if (this.color == 'yellow')
+        this.state = 2;
+      else
+        this.state = 3;
+    }
   },
   mounted() {
-    this.timeLeft = this.colors[this.state].interval;
+    if (this.$store.state.timer != -1 && this.$route.path === '/')
+      this.timeLeft = parseInt(this.$store.state.timer);
+    else
+      this.timeLeft = this.colors[this.state].interval;
+    if (this.$route.path != `/${this.colors[this.state].name}`) this.$router.push({
+      name: 'Home',
+      params: { color: this.colors[this.state].name }
+    });
     this.startTimer();
   },
   watch: {
@@ -65,7 +76,7 @@ export default {
       if (time === 3000) {
         this.startBlinking();
       }
-      if (time === 0) {
+      if (time <= 0) {
         this.stopTimer();
         this.stopBlinking();
         this.switcher();
