@@ -3,6 +3,7 @@
     <div class="light red" :class="{active:this.state === 1}"></div>
     <div class="light yellow" :class="{active:[0,2].includes(this.state)}"></div>
     <div class="light green" :class="{active:this.state === 3}"></div>
+    <div>{{ timeLeft / 1000 }} секунд</div>
   </div>
 </template>
 
@@ -13,20 +14,31 @@ export default {
 
   data: () => ({
     state: -1,
+    timeLeft: 0,
     colors: [
-      { name: 'yellow', interval: 300, next: 1 },
-      { name: 'red', interval: 1000, next: 2 },
-      { name: 'yellow', interval: 300, next: 3 },
-      { name: 'green', interval: 1500, next: 0 },
+      { name: 'yellow', interval: 3000, next: 1 },
+      { name: 'red', interval: 10000, next: 2 },
+      { name: 'yellow', interval: 3000, next: 3 },
+      { name: 'green', interval: 15000, next: 0 },
     ]
   }),
   methods: {
     switcher() {
       this.state = this.colors[this.state].next;
-      this.$router.push({name: 'Home', params: { color: this.colors[this.state].name}});
-    }
+      this.timeLeft = this.colors[this.state].interval;
+      this.startTimer();
+      this.$router.push({ name: 'Home', params: { color: this.colors[this.state].name } });
+    },
+    startTimer() {
+      this.timer = setInterval(() => {
+        this.timeLeft = this.timeLeft - 1000;
+      }, 1000)
+    },
+    stopTimer() {
+      clearTimeout(this.timer)
+    },
   },
-  mounted() {
+  created() {
     if (this.color == 'red')
       this.state = 1;
     else if (this.color == 'yellow')
@@ -36,9 +48,18 @@ export default {
     else
       this.state = 0;
   },
-  updated() {
-    setTimeout(this.switcher, this.colors[this.state].interval);
-  }
+  mounted() {
+    this.timeLeft = this.colors[this.state].interval;
+    this.startTimer();
+  },
+  watch: {
+    timeLeft(time) {
+      if (time === 0) {
+        this.stopTimer();
+        this.switcher();
+      }
+    }
+  },
 }
 </script>
 
