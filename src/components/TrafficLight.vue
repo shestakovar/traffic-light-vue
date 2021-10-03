@@ -2,7 +2,7 @@
   <div class="traffic-light">
     <div class="light red" :class="{active:this.state === 1}"></div>
     <div class="light yellow" :class="{active:[0,2].includes(this.state)}"></div>
-    <div class="light green" :class="{active:this.state === 3}"></div>
+    <div class="light green" :class="{active:this.state === 3 && isBlinking}"></div>
     <div>{{ timeLeft / 1000 }} секунд</div>
   </div>
 </template>
@@ -11,8 +11,8 @@
 export default {
   name: "TrafficLight",
   props: ["color"],
-
   data: () => ({
+    isBlinking: true,
     state: -1,
     timeLeft: 0,
     colors: [
@@ -24,6 +24,7 @@ export default {
   }),
   methods: {
     switcher() {
+      this.isBlinking = true;
       this.state = this.colors[this.state].next;
       this.timeLeft = this.colors[this.state].interval;
       this.startTimer();
@@ -32,10 +33,18 @@ export default {
     startTimer() {
       this.timer = setInterval(() => {
         this.timeLeft = this.timeLeft - 1000;
-      }, 1000)
+      }, 1000);
+    },
+    startBlinking() {
+      this.blinking = setInterval(() => {
+        this.isBlinking = !this.isBlinking;
+      }, 500);
     },
     stopTimer() {
-      clearTimeout(this.timer)
+      clearTimeout(this.timer);
+    },
+    stopBlinking() {
+      clearTimeout(this.blinking);
     },
   },
   created() {
@@ -43,10 +52,9 @@ export default {
       this.state = 1;
     else if (this.color == 'yellow')
       this.state = 2;
-    else if (this.color == 'green')
-      this.state = 3;
     else
-      this.state = 0;
+      this.state = 3;
+    if (this.$route.path != `/${this.colors[this.state].name}`) this.$router.push({ name: 'Home', params: { color: this.colors[this.state].name } });
   },
   mounted() {
     this.timeLeft = this.colors[this.state].interval;
@@ -54,8 +62,12 @@ export default {
   },
   watch: {
     timeLeft(time) {
+      if (time === 3000) {
+        this.startBlinking();
+      }
       if (time === 0) {
         this.stopTimer();
+        this.stopBlinking();
         this.switcher();
       }
     }
