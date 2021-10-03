@@ -9,8 +9,10 @@
 <script>
 export default {
   name: "TrafficLight",
+  props: ["color"],
+
   data: () => ({
-    state: 1,
+    state: -1,
     colors: [
       { name: 'yellow', interval: 300, next: 1 },
       { name: 'red', interval: 1000, next: 2 },
@@ -21,10 +23,20 @@ export default {
   methods: {
     switcher() {
       this.state = this.colors[this.state].next;
-      setTimeout(this.switcher, this.colors[this.state].interval);
+      this.$router.push({name: 'Home', params: { color: this.colors[this.state].name}});
     }
   },
   mounted() {
+    if (this.color == 'red')
+      this.state = 1;
+    else if (this.color == 'yellow')
+      this.state = 2;
+    else if (this.color == 'green')
+      this.state = 3;
+    else
+      this.state = 0;
+  },
+  updated() {
     setTimeout(this.switcher, this.colors[this.state].interval);
   }
 }

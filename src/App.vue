@@ -1,16 +1,14 @@
 <template>
   <div id="app">
-    <traffic-light/>
+    <router-view/>
   </div>
 </template>
 
 <script>
 
-import TrafficLight from "@/components/TrafficLight";
-
 export default {
   name: 'App',
-  components: { TrafficLight }
+  components: {  }
 }
 </script>
 
